@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { createPortal } from 'react-dom'
 import './Map.css';
 import mapboxgl from 'mapbox-gl';
 
@@ -6,6 +7,14 @@ mapboxgl.accessToken ='pk.eyJ1IjoiYmVzbWEiLCJhIjoiY2s3c2txeDNuMGZ2aTNmcGdwZnkyNm
 
 class Map extends Component {
 
+    constructor(props) {
+    super(props)
+
+    this.setContentRef = node =>
+      (this.contentRef =
+        ((!node || !node.contentWindow) && null) ||
+        node.contentWindow.document.body)
+  }
     componentDidMount() {
         this._displayMap()
         this._addCurrentLocationControl()
@@ -78,6 +87,7 @@ class Map extends Component {
                 <div ref={el => this.mapContainer = el} className='map-container' />
             </div>
         )
+
     }
 }
 
