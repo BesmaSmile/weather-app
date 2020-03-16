@@ -1,2 +1,2 @@
-export * from './reducer.constants';
+export * from './reducers.constants';
 export * from './api.constants';
