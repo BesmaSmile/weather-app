@@ -89,8 +89,9 @@ class Map extends Component {
     }
 
     _updateWeather(longitude,latitude){
-        const { getCurrentWeather } =this.props
+        const { getCurrentWeather, getDailyWeather } =this.props
         getCurrentWeather(longitude,latitude)
+        getDailyWeather(longitude,latitude)
     }
 
     render() {
@@ -105,7 +106,8 @@ class Map extends Component {
 
 
 const actionCreators = {
-    getCurrentWeather: weatherActions.getCurrentWeatherByGeograpgicCoordinates
+    getCurrentWeather: weatherActions.getCurrentWeatherByGeograpgicCoordinates,
+    getDailyWeather: weatherActions.getDailyWeatherByGeograpgicCoordinates
 }
 
 export default connect(()=>({}), actionCreators)(Map);

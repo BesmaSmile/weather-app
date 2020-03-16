@@ -2,22 +2,42 @@ import { reducersConstants } from '../../constants';
 
 export function weather(state = {}, action) {
     switch(action.type) {
-        case reducersConstants.WEATHER_REQUEST:
+        //Current weather
+        case reducersConstants.CURRENT_WEATHER_REQUEST:
         return {
             ...state,
-            pending: true
+            currentWeatherPending: true
         }
-        case reducersConstants.WEATHER_SUCCESS:
+        case reducersConstants.CURRENT_WEATHER_SUCCESS:
         return {
             ...state,
-            pending: false,
-            weather: action.weather
+            currentWeatherPending: false,
+            currentWeather: action.weather
         }
-        case reducersConstants.WEATHER_FAILURE:
+        case reducersConstants.CURRENT_WEATHER_FAILURE:
         return {
             ...state,
-            pending: false,
-            error : action.error
+            currentWeatherPending: false,
+            currentWeatherError : action.error
+        }
+
+        //Daily weather
+        case reducersConstants.DAILY_WEATHER_REQUEST:
+        return {
+            ...state,
+            dailyWeatherPending: true
+        }
+        case reducersConstants.DAILY_WEATHER_SUCCESS:
+        return {
+            ...state,
+            dailyWeatherPending: false,
+            dailyWeather: action.weather
+        }
+        case reducersConstants.DAILY_WEATHER_FAILURE:
+        return {
+            ...state,
+            dailyWeatherPending: false,
+            dailyWeatherError : action.error
         }
         default:
         return state

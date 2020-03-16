@@ -22,18 +22,19 @@ class App extends Component{
         },1000)
     }
     render(){
-        const { weather, pending, error }=this.props
+        const { currentWeather, currentWeatherPending, currentWeatherError,
+                dailyWeather, dailyWeatherPending, dailyWeatherError }=this.props
+
         const { currentTime }=this.state
         moment.locale('fr')
-        console.log(weather);
         return (
             <div className='app-container'>
                 <div className='row'>
                     <div className='col-md-2'>
                         <div className='card'>
-                            {weather && !pending &&
+                            {currentWeather && !currentWeatherPending &&
                                 <div>
-                                    <div>{weather.name}</div>
+                                    <div>{currentWeather.city}</div>
                                     <div>{moment().format('dddd')}</div>
                                     <div>{moment().format('Do MMMM  YYYY')}</div>
                                     <div> {currentTime}</div>
@@ -43,7 +44,7 @@ class App extends Component{
                         </div>
 
                         <div className='card'>
-                            {weather && !pending &&
+                            {currentWeather && !currentWeatherPending &&
                                 <div>
                                     <div  className='row'>
                                         <div className='col-md-6' >
@@ -51,52 +52,52 @@ class App extends Component{
                                                 <img src={images.transparent}
                                                     className='weather-image'
                                                     width={60} height={60}
-                                                    style={{backgroundImage: `url("http://openweathermap.org/img/w/${weather.weather[0].icon}.png")`}} />
+                                                    style={{backgroundImage: `url("http://openweathermap.org/img/w/${currentWeather.icon}.png")`}} />
 
                                         </div>
                                         <div className='col-md-6'>
-                                            {weather.main.temp} °C
+                                            {currentWeather.temp} °C
                                         </div>
                                     </div>
-                                    <span>{weather.weather[0].description}</span>
+                                    <span>{currentWeather.description}</span>
                                 </div>
                             }
                         </div>
 
                         <div className='card'>
-                            {weather && !pending &&
+                            {currentWeather && !currentWeatherPending &&
                                 <div className='card-row'>
                                     <img src={icons.pressure}
                                         className='icon'/>
                                     <div>
                                         <div>Pression</div>
-                                        <div>{weather.main.pressure} hpa</div>
+                                        <div>{currentWeather.pressure} hpa</div>
                                     </div>
                                 </div>
                             }
                         </div>
 
                         <div className='card'>
-                            {weather && !pending &&
+                            {currentWeather && !currentWeatherPending &&
                                 <div className='card-row'>
                                     <img src={icons.wind}
                                         className='icon'/>
                                     <div>
                                     <div>Vent</div>
-                                    <div>{weather.wind.speed} m/s</div>
+                                    <div>{currentWeather.wind} m/s</div>
                                     </div>
                                 </div>
                             }
                         </div>
 
                         <div className='card'>
-                            {weather && !pending &&
+                            {currentWeather && !currentWeatherPending &&
                                 <div className='card-row'>
                                     <img src={icons.humidity}
                                         className='icon'/>
                                     <div>
                                     <div>Humidité</div>
-                                    <div>{weather.main.humidity} %</div>
+                                    <div>{currentWeather.humidity} %</div>
                                     </div>
                                 </div>
                             }
@@ -120,18 +121,34 @@ class App extends Component{
                         <Map/>
                     </div>
                     <div className='col-md-2'>
-                    <div className='card'>
-                        <span>Samedi</span>
-                        <span>12 mars</span>
-                        <div  className='row'>
-                            <div className='col-md-6'>
-                                weather icon
-                            </div>
-                            <div className='col-md-6'>
-                                20 °C
-                            </div>
-                        </div>
-                    </div>
+                    {
+                        dailyWeather && !dailyWeatherPending &&
+                        dailyWeather.filter(weather=>moment(weather.date,"YYYY-MM-DD").format('Do MMMM  YYYY') != moment().format('Do MMMM  YYYY'))
+                        .map((weather,index)=>{
+                            return (
+                                <div key={index} className='card'>
+                                    <div>{moment(weather.date,"YYYY-MM-DD").format('dddd')}</div>
+                                    <div>{moment(weather.date,"YYYY-MM-DD").format('Do MMMM  YYYY')}</div>
+                                    <div  className='card-row'>
+                                        <img src={images.transparent}
+                                            className='weather-image'
+                                            width={60} height={60}
+                                            style={{backgroundImage: `url("http://openweathermap.org/img/w/${weather.icon}.png")`}} />
+                                        <div>
+                                            {weather.temp_max} °C_
+                                        </div>
+                                        <div>
+                                            {weather.temp_min} °C
+                                        </div>
+                                    </div>
+                                    <div>
+                                        {weather.description}
+                                    </div>
+                                </div>
+                            )
+                        })
+                    }
+
                     </div>
                 </div>
             </div>
@@ -140,8 +157,10 @@ class App extends Component{
 
 }
 function mapState(state) {
-    const { weather, pending, error } = state.weather;
-    return { weather, pending, error };
+    const { currentWeather, currentWeatherPending, currentWeatherError,
+            dailyWeather, dailyWeatherPending, dailyWeatherError} = state.weather;
+    return { currentWeather, currentWeatherPending, currentWeatherError,
+            dailyWeather, dailyWeatherPending, dailyWeatherError };
 }
 
 
