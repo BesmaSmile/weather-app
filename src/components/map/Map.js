@@ -2,19 +2,13 @@ import React, { Component } from 'react';
 import { createPortal } from 'react-dom'
 import './Map.css';
 import mapboxgl from 'mapbox-gl';
+import { connect } from 'react-redux';
+import { weatherActions } from '../../actions';
 
 mapboxgl.accessToken ='pk.eyJ1IjoiYmVzbWEiLCJhIjoiY2s3c2txeDNuMGZ2aTNmcGdwZnkyNmtidiJ9.H0okliaNPLwTS4ar8GW7xw'
 
 class Map extends Component {
 
-    constructor(props) {
-    super(props)
-
-    this.setContentRef = node =>
-      (this.contentRef =
-        ((!node || !node.contentWindow) && null) ||
-        node.contentWindow.document.body)
-  }
     componentDidMount() {
         this._displayMap()
         this._addCurrentLocationControl()
@@ -33,8 +27,9 @@ class Map extends Component {
         this.map.on('click', e=> {
             //update center and current location marker
             this.map.flyTo({ center: e.lngLat });
-            this.positionMarker.setLngLat(e.lngLat)
-            //update weather data......
+            const {lng, lat}=e.lngLat;
+            this._setUpMarker(lng,lat)
+            this._updateWeather(lng,lat)
         });
     }
 
@@ -48,7 +43,9 @@ class Map extends Component {
                 trackUserLocation: true
             })
         userLocationControl.on('geolocate',data=>{
-            //update weather data......
+            const { longitude, latitude}=data.coords
+            this._setUpMarker(longitude,latitude)
+            this._updateWeather(longitude,latitude)
         })
         this.map.addControl(userLocationControl)
     }
@@ -63,23 +60,38 @@ class Map extends Component {
     _showCurrentLocation(){
         const options = {
             enableHighAccuracy: true,
-            timeout: 5000,
+            timeout: 10000,
             maximumAge: 0
         };
         navigator.geolocation.getCurrentPosition(pos=>{
             const crd = pos.coords;
-            this.positionMarker = new mapboxgl.Marker()
-              .setLngLat([crd.longitude, crd.latitude])
-              .addTo(this.map);
-             this.positionMarker.setDraggable(true)
-             this.positionMarker.on('dragend', result=>{
-                 //update weather data
-             })
+            this._setUpMarker(crd.longitude, crd.latitude)
+            this._updateWeather(crd.longitude,crd.latitude)
         }, error=>{
             console.log(error);
         }, options);
     }
 
+    _setUpMarker(longitude, latitude){
+        if(this.positionMarker){
+            this.positionMarker.setLngLat([longitude,latitude])
+        }
+        else{
+            this.positionMarker = new mapboxgl.Marker()
+              .setLngLat([longitude, latitude])
+              .addTo(this.map);
+             this.positionMarker.setDraggable(true)
+             this.positionMarker.on('dragend', result=>{
+                 const {lng,lat}=result.target._lngLat
+                 this._updateWeather(lng,lat)
+             })
+        }
+    }
+
+    _updateWeather(longitude,latitude){
+        const { getCurrentWeather } =this.props
+        getCurrentWeather(longitude,latitude)
+    }
 
     render() {
         return (
@@ -91,4 +103,9 @@ class Map extends Component {
     }
 }
 
-export default Map;
+
+const actionCreators = {
+    getCurrentWeather: weatherActions.getCurrentWeatherByGeograpgicCoordinates
+}
+
+export default connect(()=>({}), actionCreators)(Map);
