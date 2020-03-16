@@ -1,5 +1,7 @@
 import React from 'react';
 import logo from '../../logo.svg';
+import chart from '../../assets/icons/chart.svg';
+import map from '../../assets/icons/map.svg';
 import './App.css';
 import Map from '../../components/map';
 
@@ -49,6 +51,14 @@ function App() {
                     <div className='top-bar'>
                         <div className='search-container'>
                             <input className='search-input'/>
+                        </div>
+                        <div className='buttons-container'>
+                            <button className='chart-button'>
+                                <img src={chart} className="App-logo" alt="Evolution" />
+                            </button>
+                            <button className='map-button'>
+                                <img src={map} className="App-logo" alt="Evolution" />
+                            </button>
                         </div>
                     </div>
                     <Map/>
