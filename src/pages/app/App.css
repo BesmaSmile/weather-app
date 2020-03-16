@@ -4,9 +4,13 @@
     background-color: #eee;
 }
 
-.col-md-2, .col-md-8, .col-md-4{
+.col-md-2, .col-md-8,{
     padding-left: 10px;
     padding-right: 10px;
+}
+
+.no-padding{
+    padding: 0;
 }
 
 .top-bar{
@@ -19,8 +23,13 @@
     box-shadow:0px 2px 3px 0 rgba(0, 0, 0, .2);
     margin-bottom: 10px;
     border-color: transparent;
-    padding: 5px;
 }
+
+.card-row{
+    display: flex;
+    flex-direction: row;
+}
+
 .search-container{
     padding:5px;
     border-style: solid;
@@ -66,4 +75,16 @@ input:focus,button:focus{
     height: 45px;
     pointer-events: none;
     color:  #B43E5A;
+}
+
+.weather-image{
+    background-size:contain;
+    border: 0;
+}
+
+.icon{
+    width: 70px;
+    height: 70px;
+    padding: 10px;
+    border-right: 1px #eee solid;
 }
