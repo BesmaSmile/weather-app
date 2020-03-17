@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom'
 import './Map.css';
 import mapboxgl from 'mapbox-gl';
 import { connect } from 'react-redux';
-import { weatherActions } from '../../actions';
+import { locationActions, weatherActions } from '../../actions';
 
 mapboxgl.accessToken ='pk.eyJ1IjoiYmVzbWEiLCJhIjoiY2s3c2txeDNuMGZ2aTNmcGdwZnkyNmtidiJ9.H0okliaNPLwTS4ar8GW7xw'
 
@@ -14,6 +14,7 @@ class Map extends Component {
         this._addCurrentLocationControl()
         this._addNavControl()
         this._showCurrentLocation()
+        this.props.getCurrentLocation()
     }
 
     _displayMap(){
@@ -60,7 +61,7 @@ class Map extends Component {
     _showCurrentLocation(){
         const options = {
             enableHighAccuracy: true,
-            timeout: 10000,
+            timeout: 20000,
             maximumAge: 0
         };
         navigator.geolocation.getCurrentPosition(pos=>{
@@ -95,6 +96,7 @@ class Map extends Component {
     }
 
     render() {
+        console.log(this.props.currentLocation);
         return (
             <div className='main-container'>
                 <div ref={el => this.mapContainer = el} className='map-container' />
@@ -104,10 +106,15 @@ class Map extends Component {
     }
 }
 
-
-const actionCreators = {
-    getCurrentWeather: weatherActions.getCurrentWeatherByGeograpgicCoordinates,
-    getDailyWeather: weatherActions.getDailyWeatherByGeograpgicCoordinates
+function mapState(state) {
+    const { currentLocation, currentLocationPending, currentLocationError} = state.location;
+    return { currentLocation, currentLocationPending, currentLocationError };
 }
 
-export default connect(()=>({}), actionCreators)(Map);
+const actionCreators = {
+    getCurrentLocation: locationActions.getCurrentLocation,
+    getCurrentWeather: weatherActions.getCurrentWeatherByGeograpgicCoordinates,
+    getDailyWeather: weatherActions.getDailyWeatherByGeograpgicCoordinates,
+}
+
+export default connect(mapState, actionCreators)(Map);
