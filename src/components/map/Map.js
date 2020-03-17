@@ -82,7 +82,7 @@ class Map extends Component {
             this.positionMarker.setLngLat([longitude,latitude])
         }
         else{
-            this.positionMarker = new mapboxgl.Marker()
+            this.positionMarker = new mapboxgl.Marker({color:'#B43E5A'})
               .setLngLat([longitude, latitude])
               .addTo(this.map);
              this.positionMarker.setDraggable(true)

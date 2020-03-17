@@ -6,50 +6,49 @@ import { icons, images } from '../../assets';
 import './App.css';
 import Map from '../../components/map';
 import 'moment/locale/fr';
-import Chart from '../../components/chart';
+import Chart from '../chart';
 import { locationActions, weatherActions } from '../../actions';
-import { Switch, Route, Link } from "react-router-dom";
+import { Switch, Route, NavLink } from "react-router-dom";
 
 class App extends Component{
     constructor(props){
         super(props)
         this.state={
-            currentTime :moment().format('LTS')
+            currentTime :moment().format('LTS'),
+            askedForCurrentWeather : false,
+            askedForDailyWeather : false,
+            date : moment().format('YYYY-MM-DD')
         }
     }
 
     componentDidMount() {
-        const { getCurrentLocation }=this.props
-        getCurrentLocation()
+        const { getCurrentLocation, getCurrentWeather, getDailyWeather }=this.props
+        getCurrentLocation((location)=>{
+            const { longitude, latitude }=location
+            getCurrentWeather(longitude, latitude)
+            getDailyWeather(longitude, latitude)
+        })
         setInterval( () => {
           this.setState({
             currentTime : moment().format('LTS')
           })
-        },1000)
+      },1000)
     }
 
-    componentDidUpdate(){
-        const { location, currentWeather, dailyWeather, getCurrentWeather, getDailyWeather }=this.props
-        if(location){
-            const { longitude, latitude }=location
-            if(!currentWeather){
-                getCurrentWeather(longitude, latitude)
-            }
-            if(!dailyWeather){
-                getDailyWeather(longitude, latitude)
-            }
-        }
+    _selectDate(date){
+        console.log(date);
+        this.setState({
+            date: date
+        })
     }
 
     render(){
         const { currentWeather, currentWeatherPending, currentWeatherError,
                 dailyWeather, dailyWeatherPending, dailyWeatherError }=this.props
-        const { currentTime }=this.state
+        const { currentTime, date }=this.state
         moment.locale('fr')
         return (
             <div className='app-container'>
-                <Link to="/">Map</Link>
-                <Link to="/chart">Chart</Link>
                 <div className='row'>
                     <div className='col-md-2'>
                         <div className='card'>
@@ -131,21 +130,33 @@ class App extends Component{
                                 <input className='search-input'/>
                             </div>
                             <div className='buttons-container'>
-                                <button className='chart-button'>
-                                    <img src={icons.chart} className="App-logo" alt="Evolution" />
-                                </button>
-                                <button className='map-button'>
-                                    <img src={icons.map} className="App-logo" alt="Evolution" />
-                                </button>
+
+
+                                <NavLink exact to="/" activeClassName='selected'>
+                                    <button className='img-button'>
+                                        <img src={icons.map}/>
+                                    </button>
+                                </NavLink>
+
+
+
+                                    <NavLink exact to="/chart" activeClassName='selected'>
+                                        <button className='img-button'>
+                                            <img src={icons.chart}/>
+                                        </button>
+                                    </NavLink>
+
+
                             </div>
                         </div>
                         <Switch>
-                              <Route path="/chart">
-                                    <Chart/>
-                              </Route>
-                              <Route path="/">
-                                  <Map/>
-                              </Route>
+                            <Route exact path="/">
+                                <Map/>
+                            </Route>
+                            <Route exact path="/chart">
+                                <Chart date={date}/>
+                            </Route>
+
                         </Switch>
                     </div>
                     <div className='col-md-2'>
@@ -157,7 +168,7 @@ class App extends Component{
                                 <div key={index} className='card'>
                                     <div>{moment(weather.date,"YYYY-MM-DD").format('dddd')}</div>
                                     <div>{moment(weather.date,"YYYY-MM-DD").format('Do MMMM  YYYY')}</div>
-                                    <div  className='card-row'>
+                                    <div  className='card-row' onClick={()=>this._selectDate(moment(weather.date,"YYYY-MM-DD").format('YYYY-MM-DD'))}>
                                         <img src={images.transparent}
                                             className='weather-image'
                                             width={60} height={60}
@@ -186,10 +197,10 @@ class App extends Component{
 }
 
 function mapState(state) {
-    const { location, currentLocationPending, currentLocationError} = state.location;
+    const { currentLocationPending, currentLocationError} = state.location;
     const { currentWeather, currentWeatherPending, currentWeatherError,
             dailyWeather, dailyWeatherPending, dailyWeatherError} = state.weather;
-    return { location, currentLocationPending, currentLocationError,
+    return { currentLocationPending, currentLocationError,
             currentWeather, currentWeatherPending, currentWeatherError,
             dailyWeather, dailyWeatherPending, dailyWeatherError };
 }

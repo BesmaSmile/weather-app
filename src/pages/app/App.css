@@ -58,7 +58,7 @@ input:focus,button:focus{
     padding-right: 10px;
 }
 
-.map-button,.chart-button{
+.img-button{
     height: 45px;
     width: 45px;
     background-color: #eee;
@@ -66,15 +66,13 @@ input:focus,button:focus{
     border-width: 0;
 }
 
-.chart-button{
+.selected>.img-button{
     background-color: #fff;
 }
-
-.App-logo {
+.img-button>img{
     padding: 10px;
     height: 45px;
     pointer-events: none;
-    color:  #B43E5A;
 }
 
 .weather-image{

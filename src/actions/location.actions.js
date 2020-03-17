@@ -7,12 +7,12 @@ export const locationActions = {
     updateLocation
 };
 
-function getCurrentLocation() {
+function getCurrentLocation(callback) {
     return dispatch => {
         dispatch(request());
         locationService.getCurrentLocation(location=>{
-            const {longitude, latitude }=location.coords
-            dispatch(success({longitude, latitude }));
+            dispatch(success(location.coords));
+            callback(location.coords)
         }, error=>{
             dispatch(failure(error.message));
         })
@@ -26,7 +26,7 @@ function getCurrentLocation() {
 
 function updateLocation(location) {
     return dispatch => {
-            dispatch({ 
+            dispatch({
                 type: reducersConstants.UPDATE_LOCATION,
                 location
             });
