@@ -13,11 +13,21 @@ class Map extends Component {
         this._displayMap()
         this._addCurrentLocationControl()
         this._addNavControl()
-        this._showCurrentLocation()
-        this.props.getCurrentLocation()
+        const { location }=this.props
+        if(location){
+            this._showLocation()
+        }
+    }
+
+    componentDidUpdate(){
+        const { location }=this.props
+        if(location){
+            this._showLocation()
+        }
     }
 
     _displayMap(){
+        const {updateLocation}=this.props
         this.map = new mapboxgl.Map({
             container: this.mapContainer,
             style: 'mapbox://styles/mapbox/streets-v11',
@@ -29,13 +39,15 @@ class Map extends Component {
             //update center and current location marker
             this.map.flyTo({ center: e.lngLat });
             const {lng, lat}=e.lngLat;
-            this._setUpMarker(lng,lat)
+            //this._setUpMarker(lng,lat)
+            updateLocation({longitude :lng, latitude: lat})
             this._updateWeather(lng,lat)
         });
     }
 
     //button to move to current location
     _addCurrentLocationControl(){
+        const { updateLocation }= this.props
         const userLocationControl=new mapboxgl.GeolocateControl({
                 positionOptions: {
                     enableHighAccuracy: true
@@ -45,7 +57,8 @@ class Map extends Component {
             })
         userLocationControl.on('geolocate',data=>{
             const { longitude, latitude}=data.coords
-            this._setUpMarker(longitude,latitude)
+            //this._setUpMarker(longitude,latitude)
+            updateLocation(data.coords)
             this._updateWeather(longitude,latitude)
         })
         this.map.addControl(userLocationControl)
@@ -57,23 +70,14 @@ class Map extends Component {
         this.map.addControl(nav, 'top-left');
     }
 
-    //Display a Marker on the current location
-    _showCurrentLocation(){
-        const options = {
-            enableHighAccuracy: true,
-            timeout: 20000,
-            maximumAge: 0
-        };
-        navigator.geolocation.getCurrentPosition(pos=>{
-            const crd = pos.coords;
-            this._setUpMarker(crd.longitude, crd.latitude)
-            this._updateWeather(crd.longitude,crd.latitude)
-        }, error=>{
-            console.log(error);
-        }, options);
+    //Display a Marker on the current or selected location
+    _showLocation(){
+        const { longitude, latitude }=this.props.location
+        this._setUpMarker(longitude, latitude)
     }
 
     _setUpMarker(longitude, latitude){
+        const { updateLocation }=this.props
         if(this.positionMarker){
             this.positionMarker.setLngLat([longitude,latitude])
         }
@@ -83,7 +87,8 @@ class Map extends Component {
               .addTo(this.map);
              this.positionMarker.setDraggable(true)
              this.positionMarker.on('dragend', result=>{
-                 const {lng,lat}=result.target._lngLat
+                 const { lng, lat }=result.target._lngLat
+                 updateLocation({longitude :lng, latitude: lat})
                  this._updateWeather(lng,lat)
              })
         }
@@ -96,7 +101,6 @@ class Map extends Component {
     }
 
     render() {
-        console.log(this.props.currentLocation);
         return (
             <div className='main-container'>
                 <div ref={el => this.mapContainer = el} className='map-container' />
@@ -107,12 +111,12 @@ class Map extends Component {
 }
 
 function mapState(state) {
-    const { currentLocation, currentLocationPending, currentLocationError} = state.location;
-    return { currentLocation, currentLocationPending, currentLocationError };
+    const { location, currentLocationPending, currentLocationError} = state.location;
+    return { location, currentLocationPending, currentLocationError};
 }
 
 const actionCreators = {
-    getCurrentLocation: locationActions.getCurrentLocation,
+    updateLocation: locationActions.updateLocation,
     getCurrentWeather: weatherActions.getCurrentWeatherByGeograpgicCoordinates,
     getDailyWeather: weatherActions.getDailyWeatherByGeograpgicCoordinates,
 }

@@ -37,7 +37,6 @@ function getDailyWeatherByGeograpgicCoordinates(longitude,latitude) {
         dispatch(request());
         weatherService.getDailyWeatherByGeograpgicCoordinates(longitude,latitude)
         .then(weather => {
-            console.log(weather);
             const dailyWeather=weather.list.map(element=>(
                 {
                     temp : element.main.temp,

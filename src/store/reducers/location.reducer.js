@@ -12,13 +12,19 @@ export function location(state = {}, action) {
         return {
             ...state,
             currentLocationPending: false,
-            currentLocation: action.location
+            location: action.location
         }
         case reducersConstants.CURRENT_LOCATION_FAILURE:
         return {
             ...state,
             currentLocationPending: false,
             currentLocationError : action.error
+        }
+
+        case reducersConstants.UPDATE_LOCATION:
+        return {
+            ...state,
+            location: action.location
         }
         default:
         return state
