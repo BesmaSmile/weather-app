@@ -1,6 +1,6 @@
 import { reducersConstants } from '../../constants';
 
-export function weather(state = {}, action) {
+export function location(state = {}, action) {
     switch(action.type) {
         //Current location
         case reducersConstants.CURRENT_LOCATION_REQUEST:
