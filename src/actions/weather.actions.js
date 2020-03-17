@@ -37,15 +37,23 @@ function getDailyWeatherByGeograpgicCoordinates(longitude,latitude) {
         dispatch(request());
         weatherService.getDailyWeatherByGeograpgicCoordinates(longitude,latitude)
         .then(weather => {
+            console.log(weather);
             const dailyWeather=weather.list.map(element=>(
                 {
                     temp : element.main.temp,
+                    wind : element.wind.speed,
+                    pressure:element.main.pressure,
+                    humidity:element.main.humidity,
                     description:element.weather[0].description,
                     icon:element.weather[0].icon,
-                    date : element.dt_txt.split(' ')[0]
+                    date : element.dt_txt.split(' ')[0],
+                    hour : element.dt_txt.split(' ')[1],
                 })
             )
-            dispatch(success(calculateDailyAverageWeather(dailyWeather)));
+            dispatch(success({
+                daily : calculateDailyAverageWeather(dailyWeather),
+                hourly : dailyWeather
+            }));
         },error => {
             dispatch(failure(error.toString()));
         });
@@ -63,6 +71,9 @@ function calculateDailyAverageWeather(dailyWeather) {
     const dailyTemp=distinctDays.map(date=>{
         const currentDailyWeather=dailyWeather.filter(weather=>weather.date==date)
         const temps=currentDailyWeather.map(weather=>(weather.temp))
+        const pressures=currentDailyWeather.map(weather=>(weather.pressure))
+        const humidities=currentDailyWeather.map(weather=>(weather.humidity))
+        const winds=currentDailyWeather.map(weather=>(weather.wind))
         const mostFrequentWeather=currentDailyWeather.sort((w1,w2) =>currentDailyWeather.filter(w => w.description===w1.description).length
                 - currentDailyWeather.filter(w => w.description===w2.description).length).pop()
         return {
@@ -70,16 +81,15 @@ function calculateDailyAverageWeather(dailyWeather) {
             temp : Math.round((temps.reduce((temp1,temp2) => temp1 + temp2,0)/temps.length) * 100) / 100 ,
             temp_min : Math.min(...temps),
             temp_max: Math.max(...temps),
+            pressure_min : Math.min(...pressures),
+            pressure_max: Math.max(...pressures),
+            humidity_min : Math.min(...humidities),
+            humidity_max: Math.max(...humidities),
+            wind_min : Math.min(...winds),
+            wind_max: Math.max(...winds),
             description : mostFrequentWeather.description,
             icon: mostFrequentWeather.icon
         }
     })
-    return [...dailyTemp, {
-        date: '2020-03-16',
-        temp :25 ,
-        temp_min : 20,
-        temp_max: 26,
-        description : 'test',
-        icon: '40d'
-    }]
+    return dailyTemp
 }
