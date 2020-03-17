@@ -4,11 +4,14 @@ import moment from 'moment';
 import logo from '../../logo.svg';
 import { icons, images } from '../../assets';
 import './App.css';
+import AutocompleteInput from '../../components/autocomplete-input';
 import Map from '../../components/map';
 import 'moment/locale/fr';
 import Chart from '../chart';
 import { locationActions, weatherActions } from '../../actions';
 import { Switch, Route, NavLink } from "react-router-dom";
+import { countryCodes, countryLocations } from '../../constants';
+import Autocomplete from 'react-autocomplete';
 
 class App extends Component{
     constructor(props){
@@ -19,6 +22,7 @@ class App extends Component{
             askedForDailyWeather : false,
             date : moment().format('YYYY-MM-DD')
         }
+        this.countries=this._mapCountries()
     }
 
     componentDidMount() {
@@ -35,8 +39,16 @@ class App extends Component{
       },1000)
     }
 
+    _mapCountries(){
+        return countryLocations.map(country=>({
+            code : country.country_code,
+            name : countryCodes[country.country_code],
+            latitude : country.latlng[0],
+            longitude: country.latlng[1]
+        }))
+    }
+
     _selectDate(date){
-        console.log(date);
         this.setState({
             date: date
         })
@@ -45,7 +57,7 @@ class App extends Component{
     render(){
         const { currentWeather, currentWeatherPending, currentWeatherError,
                 dailyWeather, dailyWeatherPending, dailyWeatherError }=this.props
-        const { currentTime, date }=this.state
+        const { currentTime, date}=this.state
         moment.locale('fr')
         return (
             <div className='app-container'>
@@ -127,26 +139,20 @@ class App extends Component{
                     <div className='col-md-8'>
                         <div className='top-bar'>
                             <div className='search-container'>
-                                <input className='search-input'/>
+
+                            <AutocompleteInput options={this.countries}/>
                             </div>
                             <div className='buttons-container'>
-
-
                                 <NavLink exact to="/" activeClassName='selected'>
                                     <button className='img-button'>
                                         <img src={icons.map}/>
                                     </button>
                                 </NavLink>
-
-
-
-                                    <NavLink exact to="/chart" activeClassName='selected'>
-                                        <button className='img-button'>
-                                            <img src={icons.chart}/>
-                                        </button>
-                                    </NavLink>
-
-
+                                <NavLink exact to="/chart" activeClassName='selected'>
+                                    <button className='img-button'>
+                                        <img src={icons.chart}/>
+                                    </button>
+                                </NavLink>
                             </div>
                         </div>
                         <Switch>
