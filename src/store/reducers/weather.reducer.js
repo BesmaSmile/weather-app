@@ -6,7 +6,9 @@ export function weather(state = {}, action) {
         case reducersConstants.CURRENT_WEATHER_REQUEST:
         return {
             ...state,
-            currentWeatherPending: true
+            currentWeatherPending: true,
+            currentWeatherError : undefined,
+            currentWeather:undefined
         }
         case reducersConstants.CURRENT_WEATHER_SUCCESS:
         return {
@@ -25,7 +27,9 @@ export function weather(state = {}, action) {
         case reducersConstants.DAILY_WEATHER_REQUEST:
         return {
             ...state,
-            dailyWeatherPending: true
+            dailyWeatherError : false,
+            dailyWeatherPending: true,
+            dailyWeather: undefined
         }
         case reducersConstants.DAILY_WEATHER_SUCCESS:
         return {

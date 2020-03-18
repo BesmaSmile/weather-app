@@ -5,6 +5,7 @@ import clock2 from './clock2.svg';
 import humidity from './humidity.svg';
 import map from './map.svg';
 import pressure from './pressure.svg';
+import search from './search.svg';
 import wind from './wind.svg';
 
 export const icons={
@@ -15,5 +16,6 @@ export const icons={
     humidity,
     map,
     pressure,
+    search,
     wind
 }

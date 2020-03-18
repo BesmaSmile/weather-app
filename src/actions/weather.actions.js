@@ -1,5 +1,6 @@
 import { reducersConstants, countryCodes } from '../constants';
 import { weatherService } from '../services';
+import { capitalizeFirstLetter } from '../helpers';
 
 export const weatherActions = {
     getCurrentWeatherByGeograpgicCoordinates,
@@ -12,10 +13,10 @@ function getCurrentWeatherByGeograpgicCoordinates(longitude,latitude) {
         weatherService.getCurrentWeatherByGeograpgicCoordinates(longitude,latitude)
         .then(weather => {
             const currentWeather={
-                country : countryCodes[weather.sys.country],
+                country :countryCodes[weather.sys.country],
                 city :weather.name,
                 temp : weather.main.temp,
-                description: weather.weather[0].description,
+                description:  capitalizeFirstLetter(weather.weather[0].description),
                 pressure:weather.main.pressure,
                 humidity:weather.main.humidity,
                 wind:weather.wind.speed,
@@ -43,7 +44,7 @@ function getDailyWeatherByGeograpgicCoordinates(longitude,latitude) {
                     wind : element.wind.speed,
                     pressure:element.main.pressure,
                     humidity:element.main.humidity,
-                    description:element.weather[0].description,
+                    description: capitalizeFirstLetter(element.weather[0].description),
                     icon:element.weather[0].icon,
                     date : element.dt_txt.split(' ')[0],
                     hour : element.dt_txt.split(' ')[1],
@@ -53,11 +54,12 @@ function getDailyWeatherByGeograpgicCoordinates(longitude,latitude) {
                 daily : calculateDailyAverageWeather(dailyWeather),
                 hourly : dailyWeather,
                 city : weather.city.name,
-                country: weather.country,
+                country: countryCodes[weather.city.country],
             }));
         },error => {
             dispatch(failure(error.toString()));
         });
+
     };
 
     function request() { return { type: reducersConstants.DAILY_WEATHER_REQUEST} }

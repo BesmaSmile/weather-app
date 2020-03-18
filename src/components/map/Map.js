@@ -87,6 +87,7 @@ class Map extends Component {
              this.positionMarker.on('dragend', result=>{
                  const { lng, lat }=result.target._lngLat
                  updateLocation({longitude :lng, latitude: lat})
+                 this._setUpMarker({longitude :lng, latitude: lat})
                  this._updateWeather(lng,lat)
              })
          }

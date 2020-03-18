@@ -10,8 +10,44 @@ import 'moment/locale/fr';
 import Chart from '../chart';
 import { locationActions, weatherActions } from '../../actions';
 import { Switch, Route, NavLink } from "react-router-dom";
-
+import { capitalizeFirstLetter } from '../../helpers';
+import { BabelLoading,
+BlockLoading,
+BlockReserveLoading,
+BoxLoading,
+CircleLoading,
+CircleToBlockLoading,
+CommonLoading,
+DisappearedLoading,
+LoopCircleLoading,
+NineCellLoading,
+TouchBallLoading,
+TransverseLoading,
+WaveLoading,
+WaveTopBottomLoading,
+WindMillLoading,
+JumpCircleLoading,
+MeteorRainLoading,
+RotateCircleLoading,
+StickyBallLoading,
+SemipolarLoading,
+SolarSystemLoading,
+LadderLoading,
+HeartBoomLoading,
+RollBoxLoading,
+RectGraduallyShowLoading,
+PointSpreadLoading,
+ThreeHorseLoading,
+PassThrouthLoading } from 'react-loadingg';
 import Autocomplete from 'react-autocomplete';
+
+const WeatherLoading=(waiting)=>{
+    return (
+        <div className='loading-container'>
+            <SolarSystemLoading color={waiting ? ' #B43E5A' : '#ddd'}/>
+        </div>
+    )
+}
 
 class App extends Component{
     constructor(props){
@@ -20,7 +56,8 @@ class App extends Component{
             currentTime :moment().format('LTS'),
             askedForCurrentWeather : false,
             askedForDailyWeather : false,
-            date : moment().format('YYYY-MM-DD')
+            date : moment().format('YYYY-MM-DD'),
+            selectedDay : 0
         }
 
     }
@@ -39,9 +76,41 @@ class App extends Component{
       },1000)
     }
 
-    _selectDate(date){
+    _displayCurrentWeatherLoading(){
+        const {currentWeather, currentWeatherPending, currentWeatherError,
+            currentLocationPending, currentLocationError}=this.props
+        if(currentWeatherPending || currentWeatherError
+            ||(!currentWeather && (currentLocationPending || currentLocationError) ))//weather depends on current location
+        return (
+            <div className='loading-container'>
+                <SolarSystemLoading color={currentWeatherPending||currentLocationPending ? ' #B43E5A' : '#ddd'}/>
+            </div>
+        )
+    }
+
+    _displayDailyWeatherLoading(){
+        const {dailyWeather,  dailyWeatherPending, dailyWeatherError,
+            currentLocationPending, currentLocationError}=this.props
+        if(dailyWeatherPending || dailyWeatherError
+            ||(!dailyWeather && (currentLocationPending || currentLocationError) ))//weather depends on current location
+        return (
+            [0,1,2,3,4,5].map(i=>{
+                return (
+                    <div key={i} className='card'>
+                        <div className='loading-container'>
+                            <SolarSystemLoading color={dailyWeatherPending||currentLocationPending ? ' #B43E5A' : '#ddd'}/>
+                        </div>
+                    </div>
+                )
+            })
+
+        )
+    }
+
+    _selectDate(index,date){
         this.setState({
-            date: date
+            date: date,
+            selectedDay: index
         })
     }
 
@@ -49,19 +118,21 @@ class App extends Component{
         if(moment(this.state.date,"YYYY-MM-DD").format('Do MMMM  YYYY') == moment().format('Do MMMM  YYYY')){
             return this.props.currentWeather
         }else{
-            return {
-                ...this.props.dailyWeather.daily.find(weather=>weather.date
-                    ==moment(this.state.date,"YYYY-MM-DD").format('YYYY-MM-DD')),
-                city : this.props.dailyWeather.daily.city,
-                country : this.props.dailyWeather.daily.country
-            }
+            if(this.props.dailyWeather)
+                return {
+
+                    ...this.props.dailyWeather.daily.find(weather=>weather.date
+                        ==moment(this.state.date,"YYYY-MM-DD").format('YYYY-MM-DD')),
+                    city : this.props.dailyWeather.city,
+                    country : this.props.dailyWeather.country
+                }
         }
     }
 
     render(){
-        const { currentWeather, currentWeatherPending, currentWeatherError,
+        const { currentLocationError, currentLocationPending, currentWeather, currentWeatherPending, currentWeatherError,
                 dailyWeather, dailyWeatherPending, dailyWeatherError }=this.props
-        const { currentTime, date}=this.state
+        const { currentTime, date, selectedDay}=this.state
         let weather
         if(currentWeather && !currentWeatherPending)
         {
@@ -74,74 +145,66 @@ class App extends Component{
                     <div className='col-md-2'>
                         <div className='card'>
                             {weather && !currentWeatherPending &&
-                                <div>
-                                    <div>{weather.city}{weather.country!=weather.city ? ' ,'+weather.country : '' }</div>
-                                    <div>{moment().format('dddd')}</div>
-                                    <div>{moment().format('Do MMMM  YYYY')}</div>
-                                    <div> {currentTime}</div>
+                                <div className='card-inner'>
+                                    {(weather.city || weather.country) && <div className='default-text city'>{weather.city}{weather.country!=weather.city ? ' ,'+weather.country : '' }</div>}
+                                    {!weather.city && !weather.country && <div className='default-text city'>Endroit unconnu</div>}
+
+                                    <div className='default-text'>{capitalizeFirstLetter(moment().format('dddd'))} {moment().format('Do MMMM  YYYY')}</div>
+                                    <div className='default-text'> {currentTime}</div>
                                 </div>
                             }
+                            {this._displayCurrentWeatherLoading()}
 
                         </div>
 
                         <div className='card'>
                             {weather && !currentWeatherPending &&
-                                <div>
+                                <>
+                                <div className='card-inner'>
+                                    <div className='weather-day'>{capitalizeFirstLetter(moment(date).format('dddd'))}</div>
                                     <div  className='row'>
                                         <div className='col-md-6' >
-
                                                 <img src={images.transparent}
                                                     className='weather-image'
                                                     width={60} height={60}
                                                     style={{backgroundImage: `url("http://openweathermap.org/img/w/${weather.icon}.png")`}} />
 
                                         </div>
-                                        <div className='col-md-6'>
-                                            {weather.temp} °C
+                                        <div className='col-md-6 weather-value temp-value'>
+                                            {weather.temp} <span className='degree'>°C</span>
                                         </div>
                                     </div>
-                                    <span>{weather.description}</span>
+                                    <span className='default-text'>{weather.description}</span>
                                 </div>
-                            }
-                        </div>
-
-                        <div className='card'>
-                            {weather && !currentWeatherPending &&
+                                <div className='divider'></div>
                                 <div className='card-row'>
                                     <img src={icons.pressure}
                                         className='icon'/>
-                                    <div>
-                                        <div>Pression</div>
-                                        <div>{weather.pressure} hpa</div>
+                                    <div className='card-inner'>
+                                        <div className='weather-title'>Pression</div>
+                                        <div className='weather-value'>{weather.pressure} hpa</div>
                                     </div>
                                 </div>
-                            }
-                        </div>
-
-                        <div className='card'>
-                            {weather && !currentWeatherPending &&
                                 <div className='card-row'>
                                     <img src={icons.wind}
                                         className='icon'/>
-                                    <div>
-                                    <div>Vent</div>
-                                    <div>{weather.wind} m/s</div>
+                                    <div className='card-inner'>
+                                    <div className='weather-title'>Vent</div>
+                                    <div className='weather-value'>{weather.wind} m/s</div>
                                     </div>
                                 </div>
-                            }
-                        </div>
-
-                        <div className='card'>
-                            {weather && !currentWeatherPending &&
                                 <div className='card-row'>
                                     <img src={icons.humidity}
                                         className='icon'/>
-                                    <div>
-                                    <div>Humidité</div>
-                                    <div>{weather.humidity} %</div>
+                                    <div className='card-inner'>
+                                    <div className='weather-title'>Humidité</div>
+                                    <div className='weather-value'>{weather.humidity} %</div>
                                     </div>
                                 </div>
+                                </>
                             }
+                            {this._displayCurrentWeatherLoading()}
+
                         </div>
 
                     </div>
@@ -150,65 +213,85 @@ class App extends Component{
                             <div className='search-container'>
 
                             <CountrySearchInput/>
+                            <img src={icons.search}/>
                             </div>
                             <div className='buttons-container'>
+
                                 <NavLink exact to="/" activeClassName='selected'>
                                     <button className='img-button'>
-                                        <img src={icons.map}/>
+                                        <img src={icons.chart}/>
                                     </button>
                                 </NavLink>
-                                <NavLink exact to="/chart" activeClassName='selected'>
+                                <NavLink exact to="/map" activeClassName='selected'>
                                     <button className='img-button'>
-                                        <img src={icons.chart}/>
+                                        <img src={icons.map}/>
                                     </button>
                                 </NavLink>
                             </div>
                         </div>
                         <Switch>
                             <Route exact path="/">
-                                <Map/>
-                            </Route>
-                            <Route exact path="/chart">
                                 <Chart date={date}/>
+                            </Route>
+                            <Route exact path="/map">
+                                <Map/>
                             </Route>
 
                         </Switch>
                     </div>
-                    <div className='col-md-2'>
+                    <div className='col-md-2 daily-weather'>
                     {
                         dailyWeather && !dailyWeatherPending &&
                         dailyWeather.daily.map((weather,index)=>{
                         //dailyWeather.daily.filter(weather=>moment(weather.date,"YYYY-MM-DD").format('Do MMMM  YYYY') != moment().format('Do MMMM  YYYY'))
                         //.map((weather,index)=>{
                             return (
-                                <div key={index} className='card'>
-                                    <div>{moment(weather.date,"YYYY-MM-DD").format('dddd')}</div>
-                                    <div>{moment(weather.date,"YYYY-MM-DD").format('Do MMMM  YYYY')}</div>
-                                    <div  className='card-row' onClick={()=>this._selectDate(moment(weather.date,"YYYY-MM-DD").format('YYYY-MM-DD'))}>
-                                        <img src={images.transparent}
-                                            className='weather-image'
-                                            width={60} height={60}
-                                            style={{backgroundImage: `url("http://openweathermap.org/img/w/${weather.icon}.png")`}} />
-                                        <div>
-                                            {weather.temp_max} °C_
+                                <div key={index} className={selectedDay == index ? 'card selected' : 'card'}
+                                    onClick={()=>this._selectDate(index, moment(weather.date,"YYYY-MM-DD").format('YYYY-MM-DD'))}>
+                                    <div className='card-inner'>
+                                        <div className='weather-day'>{capitalizeFirstLetter(moment(weather.date,"YYYY-MM-DD").format('dddd'))}</div>
+                                        <div className='default-text'>{moment(weather.date,"YYYY-MM-DD").format('Do MMMM  YYYY')}</div>
+                                        <div  className='card-row' >
+                                            <img src={images.transparent}
+                                                className='weather-image'
+                                                width={60} height={60}
+                                                style={{backgroundImage: `url("http://openweathermap.org/img/w/${weather.icon}.png")`}} />
+                                            <div className='max-temp'>
+                                                {weather.temp_max}°
+                                            </div>
+                                            <div className='min-temp'>
+                                                {weather.temp_min}°
+                                            </div>
                                         </div>
-                                        <div>
-                                            {weather.temp_min} °C
+                                        <div className='default-text'>
+                                            {weather.description}
                                         </div>
-                                    </div>
-                                    <div>
-                                        {weather.description}
                                     </div>
                                 </div>
                             )
                         })
                     }
 
+                    {this._displayDailyWeatherLoading()}
                     </div>
                 </div>
             </div>
       );
+      /*return(
+          <div className='test'>
+
+          <div><CircleLoading color='red'/></div>
+
+          <div><MeteorRainLoading color='blue'/></div>
+
+          <div><SemipolarLoading color='orange'/></div>
+          <div><SolarSystemLoading color='black'/></div>
+          <div><PointSpreadLoading color='yellow'/></div>
+
+          </div>
+      )*/
     }
+
 
 }
 

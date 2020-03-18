@@ -7,7 +7,7 @@ import 'moment/locale/fr';
 import 'chartjs-plugin-datalabels';
 import LineChart from '../../components/line-chart';
 import { icons } from '../../assets';
-
+import {WaveLoading } from 'react-loadingg';
 class Chart extends Component {
 
     constructor(props){
@@ -16,7 +16,7 @@ class Chart extends Component {
         this.state={
             selectedChart : 0,
             selectedTiming: 0,
-            title : 'Evolution pendant la journée'
+            title : 'Météo par heure'
         }
     }
 
@@ -61,18 +61,30 @@ class Chart extends Component {
 
     _displayChart(){
         const chart = this._getChart()
-        if(chart){
+        const {dailyWeatherPending}=this.props
+        if(chart && !dailyWeatherPending){
             return <LineChart  {...chart} />
-        }
-        else {
-            return(<div>Data not resday yet</div>)
         }
     }
 
     _selectChart(index, key){
         this.setState({
             [key] : index,
+        }, ()=>{
+            this.setState({
+                title :  this.state.selectedTiming==0? 'Météo par heure' : 'Météo par jour'
+            })
         })
+    }
+
+    _displayDailyWeatherLoading(){
+        const {dailyWeather,  dailyWeatherPending, dailyWeatherError,
+            currentLocationPending, currentLocationError}=this.props
+        if(dailyWeatherPending || dailyWeatherError
+            ||(!dailyWeather && (currentLocationPending || currentLocationError) ))//weather depends on current location
+        return (
+            <WaveLoading color={dailyWeatherPending||currentLocationPending ? ' #B43E5A' : '#ddd'}/>
+        )
     }
 
     _getChart(){
@@ -82,24 +94,24 @@ class Chart extends Component {
         if(dailyWeather){
             switch (selectedChart) {
                 case 0:
-                    chart=selectedTiming ==0//0 :daily, 1:hourly
-                        ? this._initDailyChartProperties('Température (°C)', 'temp_min', 'temp_max')
-                        : this._initHourlyChartProperties('Température (°C)', 'temp')
+                    chart=selectedTiming ==0//0 :hourly, 1:daily
+                        ? this._initHourlyChartProperties('Température (°C)', 'temp')
+                        : this._initDailyChartProperties('Température (°C)', 'temp_min', 'temp_max')
                     break;
                 case 1:
                     chart=selectedTiming ==0
-                        ? this._initDailyChartProperties('Pression (hpa)', 'pressure_min', 'pressure_max')
-                        : this._initHourlyChartProperties('Pression (hpa)', 'pressure')
+                        ? this._initHourlyChartProperties('Pression (hpa)', 'pressure')
+                        : this._initDailyChartProperties('Pression (hpa)', 'pressure_min', 'pressure_max')
                     break;
                 case 2:
                     chart=selectedTiming ==0
-                        ? this._initDailyChartProperties('Vent (m/s)', 'wind_min', 'wind_max')
-                        : this._initHourlyChartProperties('Vent (m/s)', 'wind')
+                        ? this._initHourlyChartProperties('Vent (m/s)', 'wind')
+                        : this._initDailyChartProperties('Vent (m/s)', 'wind_min', 'wind_max')
                     break;
                 case 3:
                     chart=selectedTiming ==0
-                        ? this._initDailyChartProperties('Humidité (%)', 'humidity_min', 'humidity_max')
-                        : this._initHourlyChartProperties('Humidité (%)', 'humidity')
+                        ? this._initHourlyChartProperties('Humidité (%)', 'humidity')
+                        : this._initDailyChartProperties('Humidité (%)', 'humidity_min', 'humidity_max')
                     break;
 
             }
@@ -114,10 +126,10 @@ class Chart extends Component {
                 <div className='row-container'>
                     <div className='timing-container'>
                             <button className={selectedTiming==0 ? 'selected' : ''} onClick={()=>this._selectChart(0,'selectedTiming')}>
-                                <img src={icons.calendar}/>
+                                <img src={icons.clock}/>
                             </button>
                             <button className={selectedTiming==1 ? 'selected' : ''} onClick={()=>this._selectChart(1,'selectedTiming')}>
-                                <img src={icons.clock}/>
+                                <img src={icons.calendar}/>
                             </button>
                             <h4>{title}</h4>
                     </div>
@@ -129,15 +141,16 @@ class Chart extends Component {
                     </div>
                 </div>
                 {this._displayChart()}
+                {this._displayDailyWeatherLoading()}
             </div>
         )
     }
 }
 
 function mapState(state) {
-    const { currentWeather, currentWeatherPending, currentWeatherError,
-            dailyWeather, dailyWeatherPending, dailyWeatherError } = state.weather;
-    return { currentWeather, currentWeatherPending, currentWeatherError,
+    const { currentLocationPending, currentLocationError} = state.location;
+    const { dailyWeather, dailyWeatherPending, dailyWeatherError } = state.weather;
+    return { currentLocationPending, currentLocationError,
             dailyWeather, dailyWeatherPending, dailyWeatherError };
 }
 

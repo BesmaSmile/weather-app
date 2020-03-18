@@ -6,7 +6,8 @@ export function location(state = {}, action) {
         case reducersConstants.CURRENT_LOCATION_REQUEST:
         return {
             ...state,
-            currentLocationPending: true
+            currentLocationPending: true,
+            currentLocationError:undefined
         }
         case reducersConstants.CURRENT_LOCATION_SUCCESS:
         return {
