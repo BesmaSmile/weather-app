@@ -14,12 +14,8 @@ class Chart extends Component {
         super(props)
 
         this.state={
-            chart: this.props.dailyWeather
-            ? this._initDailyChartProperties('Température (°C)', 'temp_min', 'temp_max')
-            : undefined,
             selectedChart : 0,
             selectedTiming: 0,
-            chartDate:this.props.date,
             title : 'Evolution pendant la journée'
         }
     }
@@ -46,108 +42,69 @@ class Chart extends Component {
 
     _initHourlyChartProperties=(title, key)=>{
 
-        const { dailyWeather } = this.props;
-        const { chartDate }=this.state
-
+        const { dailyWeather, date } = this.props;
+        const weather=dailyWeather.hourly
+            .filter(weather=>new Date(weather.date)>=new Date(date))
+            .slice(0, 8)
         return {
             title : title,
             datasets : [
                 {
                     borderColor: '#ccc',
                     label: key,
-                    data: dailyWeather.hourly.filter(weather=>weather.date==chartDate).map(weather=>weather[key]),
+                    data:weather.map(weather=>weather[key]),
                 }
             ],
-            labels: dailyWeather.hourly.filter(weather=>weather.date==chartDate).map(weather=>weather.hour),
+            labels: weather.map(weather=>weather.hour.slice(0, 5)),
         }
-    }
-
-    componentDidUpdate(){
-        console.log("updated");
-        const { chart, chartDate, selectedChart, selectedTiming }=this.state
-        if((!this.state.chart || this.props.date!=chartDate) && this.props.dailyWeather)
-        {
-            this.setState({
-                chartDate: this.props.date
-            }, ()=>{
-                this._selectChart(selectedChart, selectedTiming)
-            })
-        }
-    }
-
-    componentDidMount(){
-        console.log("mounted");
-    }
-
-    _displayTempChart(){
-
     }
 
     _displayChart(){
-        const { chart }=this.state
-
+        const chart = this._getChart()
         if(chart){
             return <LineChart  {...chart} />
         }
         else {
-            return(<Line ref="chart" />)
+            return(<div>Data not resday yet</div>)
         }
     }
 
-    _selectChart(selectedChart, selectedTiming){
-        let chart
-        switch (selectedChart) {
-            case 0:
-                chart=selectedTiming ==0//0 :daily, 1:hourly
-                    ? this._initDailyChartProperties('Température (°C)', 'temp_min', 'temp_max')
-                    : this._initHourlyChartProperties('Température (°C)', 'temp')
-                break;
-            case 1:
-                chart=selectedTiming ==0
-                    ? this._initDailyChartProperties('Pression (hpa)', 'pressure_min', 'pressure_max')
-                    : this._initHourlyChartProperties('Pression (hpa)', 'pressure')
-                break;
-            case 2:
-                chart=selectedTiming ==0
-                    ? this._initDailyChartProperties('Vent (m/s)', 'wind_min', 'wind_max')
-                    : this._initHourlyChartProperties('Vent (m/s)', 'wind')
-                break;
-            case 3:
-                chart=selectedTiming ==0
-                    ? this._initDailyChartProperties('Humidité (%)', 'humidity_min', 'humidity_max')
-                    : this._initHourlyChartProperties('Humidité (%)', 'humidity')
-                break;
-
-        }
+    _selectChart(index, key){
         this.setState({
-            chart: chart,
-            selectedChart : selectedChart,
-            selectedTiming: selectedTiming
-
+            [key] : index,
         })
     }
 
-    _selectTiming(index){
+    _getChart(){
+        const { selectedChart, selectedTiming }=this.state
+        const { dailyWeather }=this.props
         let chart
-        switch (index) {
-            case 0:
-                chart=this._initHourlyChartProperties('Température (°C)', 'temp')
-                break;
-            case 1:
-                chart=this._initHourlyChartProperties('Pression (hpa)', 'pressure')
-                break;
-            case 2:
-                chart=this._initHourlyChartProperties('Vent (m/s)', 'wind')
-                break;
-            case 3:
-                chart=this._initHourlyChartProperties('Humidité (%)', 'humidity')
-                break;
+        if(dailyWeather){
+            switch (selectedChart) {
+                case 0:
+                    chart=selectedTiming ==0//0 :daily, 1:hourly
+                        ? this._initDailyChartProperties('Température (°C)', 'temp_min', 'temp_max')
+                        : this._initHourlyChartProperties('Température (°C)', 'temp')
+                    break;
+                case 1:
+                    chart=selectedTiming ==0
+                        ? this._initDailyChartProperties('Pression (hpa)', 'pressure_min', 'pressure_max')
+                        : this._initHourlyChartProperties('Pression (hpa)', 'pressure')
+                    break;
+                case 2:
+                    chart=selectedTiming ==0
+                        ? this._initDailyChartProperties('Vent (m/s)', 'wind_min', 'wind_max')
+                        : this._initHourlyChartProperties('Vent (m/s)', 'wind')
+                    break;
+                case 3:
+                    chart=selectedTiming ==0
+                        ? this._initDailyChartProperties('Humidité (%)', 'humidity_min', 'humidity_max')
+                        : this._initHourlyChartProperties('Humidité (%)', 'humidity')
+                    break;
 
+            }
         }
-        this.setState({
-            chart: chart,
-            selectedTiming : index
-        })
+        return chart;
     }
 
     render() {
@@ -156,19 +113,19 @@ class Chart extends Component {
             <div>
                 <div className='row-container'>
                     <div className='timing-container'>
-                            <button className={selectedTiming==0 ? 'selected' : ''} onClick={()=>this._selectChart(selectedChart, 0)}>
+                            <button className={selectedTiming==0 ? 'selected' : ''} onClick={()=>this._selectChart(0,'selectedTiming')}>
                                 <img src={icons.calendar}/>
                             </button>
-                            <button className={selectedTiming==1 ? 'selected' : ''} onClick={()=>this._selectChart(selectedChart, 1)}>
+                            <button className={selectedTiming==1 ? 'selected' : ''} onClick={()=>this._selectChart(1,'selectedTiming')}>
                                 <img src={icons.clock}/>
                             </button>
                             <h4>{title}</h4>
                     </div>
                     <div className='filters-container'>
-                        <button className={selectedChart==0 ? 'selected' : ''} onClick={()=>this._selectChart(0, selectedTiming)}>Température</button>
-                        <button className={selectedChart==1 ? 'selected' : ''} onClick={()=>this._selectChart(1, selectedTiming)}>Pression</button>
-                        <button className={selectedChart==2 ? 'selected' : ''} onClick={()=>this._selectChart(2, selectedTiming)}>Vent</button>
-                        <button className={selectedChart==3 ? 'selected' : ''} onClick={()=>this._selectChart(3, selectedTiming)}>Humidité</button>
+                        <button className={selectedChart==0 ? 'selected' : ''} onClick={()=>this._selectChart(0, 'selectedChart')}>Température</button>
+                        <button className={selectedChart==1 ? 'selected' : ''} onClick={()=>this._selectChart(1, 'selectedChart')}>Pression</button>
+                        <button className={selectedChart==2 ? 'selected' : ''} onClick={()=>this._selectChart(2, 'selectedChart')}>Vent</button>
+                        <button className={selectedChart==3 ? 'selected' : ''} onClick={()=>this._selectChart(3, 'selectedChart')}>Humidité</button>
                     </div>
                 </div>
                 {this._displayChart()}

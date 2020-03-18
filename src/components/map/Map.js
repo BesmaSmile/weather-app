@@ -39,7 +39,6 @@ class Map extends Component {
             //update center and current location marker
             this.map.flyTo({ center: e.lngLat });
             const {lng, lat}=e.lngLat;
-            //this._setUpMarker(lng,lat)
             updateLocation({longitude :lng, latitude: lat})
             this._updateWeather(lng,lat)
         });
@@ -57,7 +56,6 @@ class Map extends Component {
             })
         userLocationControl.on('geolocate',data=>{
             const { longitude, latitude}=data.coords
-            //this._setUpMarker(longitude,latitude)
             updateLocation(data.coords)
             this._updateWeather(longitude,latitude)
         })
@@ -91,7 +89,8 @@ class Map extends Component {
                  updateLocation({longitude :lng, latitude: lat})
                  this._updateWeather(lng,lat)
              })
-        }
+         }
+        this.map.flyTo({ center: [longitude ,latitude]});
     }
 
     _updateWeather(longitude,latitude){

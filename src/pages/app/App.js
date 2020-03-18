@@ -4,13 +4,13 @@ import moment from 'moment';
 import logo from '../../logo.svg';
 import { icons, images } from '../../assets';
 import './App.css';
-import AutocompleteInput from '../../components/autocomplete-input';
+import CountrySearchInput from '../../components/country-search-input';
 import Map from '../../components/map';
 import 'moment/locale/fr';
 import Chart from '../chart';
 import { locationActions, weatherActions } from '../../actions';
 import { Switch, Route, NavLink } from "react-router-dom";
-import { countryCodes, countryLocations } from '../../constants';
+
 import Autocomplete from 'react-autocomplete';
 
 class App extends Component{
@@ -22,7 +22,7 @@ class App extends Component{
             askedForDailyWeather : false,
             date : moment().format('YYYY-MM-DD')
         }
-        this.countries=this._mapCountries()
+
     }
 
     componentDidMount() {
@@ -39,34 +39,43 @@ class App extends Component{
       },1000)
     }
 
-    _mapCountries(){
-        return countryLocations.map(country=>({
-            code : country.country_code,
-            name : countryCodes[country.country_code],
-            latitude : country.latlng[0],
-            longitude: country.latlng[1]
-        }))
-    }
-
     _selectDate(date){
         this.setState({
             date: date
         })
     }
 
+    _getSelectedDateWeather(){
+        if(moment(this.state.date,"YYYY-MM-DD").format('Do MMMM  YYYY') == moment().format('Do MMMM  YYYY')){
+            return this.props.currentWeather
+        }else{
+            return {
+                ...this.props.dailyWeather.daily.find(weather=>weather.date
+                    ==moment(this.state.date,"YYYY-MM-DD").format('YYYY-MM-DD')),
+                city : this.props.dailyWeather.daily.city,
+                country : this.props.dailyWeather.daily.country
+            }
+        }
+    }
+
     render(){
         const { currentWeather, currentWeatherPending, currentWeatherError,
                 dailyWeather, dailyWeatherPending, dailyWeatherError }=this.props
         const { currentTime, date}=this.state
+        let weather
+        if(currentWeather && !currentWeatherPending)
+        {
+            weather=this._getSelectedDateWeather()
+        }
         moment.locale('fr')
         return (
             <div className='app-container'>
                 <div className='row'>
                     <div className='col-md-2'>
                         <div className='card'>
-                            {currentWeather && !currentWeatherPending &&
+                            {weather && !currentWeatherPending &&
                                 <div>
-                                    <div>{currentWeather.city}</div>
+                                    <div>{weather.city}{weather.country!=weather.city ? ' ,'+weather.country : '' }</div>
                                     <div>{moment().format('dddd')}</div>
                                     <div>{moment().format('Do MMMM  YYYY')}</div>
                                     <div> {currentTime}</div>
@@ -76,7 +85,7 @@ class App extends Component{
                         </div>
 
                         <div className='card'>
-                            {currentWeather && !currentWeatherPending &&
+                            {weather && !currentWeatherPending &&
                                 <div>
                                     <div  className='row'>
                                         <div className='col-md-6' >
@@ -84,52 +93,52 @@ class App extends Component{
                                                 <img src={images.transparent}
                                                     className='weather-image'
                                                     width={60} height={60}
-                                                    style={{backgroundImage: `url("http://openweathermap.org/img/w/${currentWeather.icon}.png")`}} />
+                                                    style={{backgroundImage: `url("http://openweathermap.org/img/w/${weather.icon}.png")`}} />
 
                                         </div>
                                         <div className='col-md-6'>
-                                            {currentWeather.temp} °C
+                                            {weather.temp} °C
                                         </div>
                                     </div>
-                                    <span>{currentWeather.description}</span>
+                                    <span>{weather.description}</span>
                                 </div>
                             }
                         </div>
 
                         <div className='card'>
-                            {currentWeather && !currentWeatherPending &&
+                            {weather && !currentWeatherPending &&
                                 <div className='card-row'>
                                     <img src={icons.pressure}
                                         className='icon'/>
                                     <div>
                                         <div>Pression</div>
-                                        <div>{currentWeather.pressure} hpa</div>
+                                        <div>{weather.pressure} hpa</div>
                                     </div>
                                 </div>
                             }
                         </div>
 
                         <div className='card'>
-                            {currentWeather && !currentWeatherPending &&
+                            {weather && !currentWeatherPending &&
                                 <div className='card-row'>
                                     <img src={icons.wind}
                                         className='icon'/>
                                     <div>
                                     <div>Vent</div>
-                                    <div>{currentWeather.wind} m/s</div>
+                                    <div>{weather.wind} m/s</div>
                                     </div>
                                 </div>
                             }
                         </div>
 
                         <div className='card'>
-                            {currentWeather && !currentWeatherPending &&
+                            {weather && !currentWeatherPending &&
                                 <div className='card-row'>
                                     <img src={icons.humidity}
                                         className='icon'/>
                                     <div>
                                     <div>Humidité</div>
-                                    <div>{currentWeather.humidity} %</div>
+                                    <div>{weather.humidity} %</div>
                                     </div>
                                 </div>
                             }
@@ -140,7 +149,7 @@ class App extends Component{
                         <div className='top-bar'>
                             <div className='search-container'>
 
-                            <AutocompleteInput options={this.countries}/>
+                            <CountrySearchInput/>
                             </div>
                             <div className='buttons-container'>
                                 <NavLink exact to="/" activeClassName='selected'>
@@ -168,8 +177,9 @@ class App extends Component{
                     <div className='col-md-2'>
                     {
                         dailyWeather && !dailyWeatherPending &&
-                        dailyWeather.daily.filter(weather=>moment(weather.date,"YYYY-MM-DD").format('Do MMMM  YYYY') != moment().format('Do MMMM  YYYY'))
-                        .map((weather,index)=>{
+                        dailyWeather.daily.map((weather,index)=>{
+                        //dailyWeather.daily.filter(weather=>moment(weather.date,"YYYY-MM-DD").format('Do MMMM  YYYY') != moment().format('Do MMMM  YYYY'))
+                        //.map((weather,index)=>{
                             return (
                                 <div key={index} className='card'>
                                     <div>{moment(weather.date,"YYYY-MM-DD").format('dddd')}</div>

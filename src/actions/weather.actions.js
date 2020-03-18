@@ -1,6 +1,5 @@
-import { reducersConstants } from '../constants';
+import { reducersConstants, countryCodes } from '../constants';
 import { weatherService } from '../services';
-
 
 export const weatherActions = {
     getCurrentWeatherByGeograpgicCoordinates,
@@ -13,6 +12,7 @@ function getCurrentWeatherByGeograpgicCoordinates(longitude,latitude) {
         weatherService.getCurrentWeatherByGeograpgicCoordinates(longitude,latitude)
         .then(weather => {
             const currentWeather={
+                country : countryCodes[weather.sys.country],
                 city :weather.name,
                 temp : weather.main.temp,
                 description: weather.weather[0].description,
@@ -51,7 +51,9 @@ function getDailyWeatherByGeograpgicCoordinates(longitude,latitude) {
             )
             dispatch(success({
                 daily : calculateDailyAverageWeather(dailyWeather),
-                hourly : dailyWeather
+                hourly : dailyWeather,
+                city : weather.city.name,
+                country: weather.country,
             }));
         },error => {
             dispatch(failure(error.toString()));
@@ -77,13 +79,16 @@ function calculateDailyAverageWeather(dailyWeather) {
                 - currentDailyWeather.filter(w => w.description===w2.description).length).pop()
         return {
             date: date,
-            temp : Math.round((temps.reduce((temp1,temp2) => temp1 + temp2,0)/temps.length) * 100) / 100 ,
+            temp : Math.round((temps.reduce((temp1,temp2) => temp1 + temp2,0)/temps.length)),
             temp_min : Math.min(...temps),
             temp_max: Math.max(...temps),
+            pressure : Math.round((pressures.reduce((p1,p2) => p1 + p2,0)/pressures.length)),
             pressure_min : Math.min(...pressures),
             pressure_max: Math.max(...pressures),
+            humidity : Math.round((humidities.reduce((h1,h2) => h1 + h2,0)/humidities.length)),
             humidity_min : Math.min(...humidities),
             humidity_max: Math.max(...humidities),
+            wind : Math.round((winds.reduce((w1,w2) => w1 + w2,0)/winds.length)),
             wind_min : Math.min(...winds),
             wind_max: Math.max(...winds),
             description : mostFrequentWeather.description,

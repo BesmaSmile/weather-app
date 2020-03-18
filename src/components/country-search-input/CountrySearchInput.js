@@ -1,28 +1,39 @@
 import React, { Component } from 'react';
-import './AutocompleteInput.css';
-
+import './CountrySearchInput.css';
+import { locationActions, weatherActions } from '../../actions';
+import { countryCodes, countryLocations } from '../../constants';
 import Autosuggest from 'react-autosuggest';
+import { connect } from 'react-redux';
 
-class AutocompleteInput extends Component {
+class CountrySearchInput extends Component {
     constructor(props){
         super(props)
         this.state={
             value: '',
             suggestions: []
         }
+        this.options=this._mapCountries()
     }
 
+    _mapCountries(){
+        return countryLocations.map(country=>({
+            code : country.country_code,
+            name : countryCodes[country.country_code],
+            latitude : country.latlng[0],
+            longitude: country.latlng[1]
+        }))
+    }
     _getSuggestions = value => {
+        console.log(value);
         const inputValue = value.trim().toLowerCase();
         const inputLength = inputValue.length;
-        const {options}=this.props
 
-        return inputLength === 0 ? [] : options.filter(option =>
+        return inputLength === 0 ? [] : this.options.filter(option =>
             option.name && option.name.toLowerCase().slice(0, inputLength) === inputValue
         )
     }
 
-    _getSuggestionValue = suggestion => suggestion.name;
+    _getSuggestionValue = suggestion => suggestion;
 
     _renderSuggestionsContainer({ containerProps, children, query }) {
         return (
@@ -37,10 +48,25 @@ class AutocompleteInput extends Component {
         </div>
     )
 
-    onChange = (event, { newValue }) => {
-        this.setState({
-            value: newValue
-        })
+    onChange = (event, change) => {
+        const { updateLocation, getCurrentWeather, getDailyWeather }=this.props
+        if(change.method=='click')
+        {
+            this.setState({
+                value: change.newValue.name
+            })
+            const {longitude, latitude}=change.newValue
+            updateLocation({longitude, latitude})
+            getCurrentWeather(longitude,latitude)
+            getDailyWeather(longitude,latitude)
+        }else{
+            this.setState({
+                value: change.newValue
+            })
+        }
+
+        //updateLocation()
+
     }
 
 
@@ -77,4 +103,10 @@ class AutocompleteInput extends Component {
      }
 }
 
-export default AutocompleteInput;
+const actionCreators = {
+    updateLocation: locationActions.updateLocation,
+    getCurrentWeather: weatherActions.getCurrentWeatherByGeograpgicCoordinates,
+    getDailyWeather: weatherActions.getDailyWeatherByGeograpgicCoordinates,
+}
+
+export default connect(()=>({}), actionCreators)(CountrySearchInput);
