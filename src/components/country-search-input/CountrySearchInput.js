@@ -64,9 +64,6 @@ class CountrySearchInput extends Component {
                 value: change.newValue
             })
         }
-
-        //updateLocation()
-
     }
 
 
