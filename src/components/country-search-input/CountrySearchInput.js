@@ -50,7 +50,7 @@ class CountrySearchInput extends Component {
 
     onChange = (event, change) => {
         const { updateLocation, getCurrentWeather, getDailyWeather }=this.props
-        if(change.method=='click')
+        if(change.method==='click')
         {
             this.setState({
                 value: change.newValue.name

@@ -72,7 +72,7 @@ function calculateDailyAverageWeather(dailyWeather) {
             .map(element=>element.date)
             .filter((date, index, self)=> self.indexOf(date) === index)
     const dailyTemp=distinctDays.map(date=>{
-        const currentDailyWeather=dailyWeather.filter(weather=>weather.date==date)
+        const currentDailyWeather=dailyWeather.filter(weather=>weather.date===date)
         const temps=currentDailyWeather.map(weather=>(weather.temp))
         const pressures=currentDailyWeather.map(weather=>(weather.pressure))
         const humidities=currentDailyWeather.map(weather=>(weather.humidity))

@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { createPortal } from 'react-dom'
 import './Map.css';
 import mapboxgl from 'mapbox-gl';
 import { connect } from 'react-redux';

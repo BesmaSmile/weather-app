@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import moment from 'moment';
-import logo from '../../logo.svg';
 import { icons, images } from '../../assets';
 import './App.css';
 import CountrySearchInput from '../../components/country-search-input';
@@ -11,34 +10,7 @@ import Chart from '../chart';
 import { locationActions, weatherActions } from '../../actions';
 import { Switch, Route, NavLink } from "react-router-dom";
 import { capitalizeFirstLetter } from '../../helpers';
-import { BabelLoading,
-BlockLoading,
-BlockReserveLoading,
-BoxLoading,
-CircleLoading,
-CircleToBlockLoading,
-CommonLoading,
-DisappearedLoading,
-LoopCircleLoading,
-NineCellLoading,
-TouchBallLoading,
-TransverseLoading,
-WaveLoading,
-WaveTopBottomLoading,
-WindMillLoading,
-JumpCircleLoading,
-MeteorRainLoading,
-RotateCircleLoading,
-StickyBallLoading,
-SemipolarLoading,
-SolarSystemLoading,
-LadderLoading,
-HeartBoomLoading,
-RollBoxLoading,
-RectGraduallyShowLoading,
-PointSpreadLoading,
-ThreeHorseLoading,
-PassThrouthLoading } from 'react-loadingg';
+import { SemipolarLoading, SolarSystemLoading,} from 'react-loadingg';
 import Autocomplete from 'react-autocomplete';
 
 const WeatherLoading=(waiting)=>{
@@ -57,23 +29,29 @@ class App extends Component{
             askedForCurrentWeather : false,
             askedForDailyWeather : false,
             date : moment().format('YYYY-MM-DD'),
-            selectedDay : 0
+            selectedDay : 0,
+            isLoading: true
         }
 
     }
 
     componentDidMount() {
         const { getCurrentLocation, getCurrentWeather, getDailyWeather }=this.props
-        getCurrentLocation((location)=>{
-            const { longitude, latitude }=location
-            getCurrentWeather(longitude, latitude)
-            getDailyWeather(longitude, latitude)
-        })
-        setInterval( () => {
-          this.setState({
-            currentTime : moment().format('LTS')
-          })
-      },1000)
+        setTimeout(()=> {
+            this.setState({
+                isLoading:false
+            })
+            getCurrentLocation((location)=>{
+                const { longitude, latitude }=location
+                getCurrentWeather(longitude, latitude)
+                getDailyWeather(longitude, latitude)
+            })
+            setInterval( () => {
+              this.setState({
+                currentTime : moment().format('LTS')
+              })
+          },1000)
+        }, 3000);
     }
 
     _displayCurrentWeatherLoading(){
@@ -115,14 +93,14 @@ class App extends Component{
     }
 
     _getSelectedDateWeather(){
-        if(moment(this.state.date,"YYYY-MM-DD").format('Do MMMM  YYYY') == moment().format('Do MMMM  YYYY')){
+        if(moment(this.state.date,"YYYY-MM-DD").format('Do MMMM  YYYY') === moment().format('Do MMMM  YYYY')){
             return this.props.currentWeather
         }else{
             if(this.props.dailyWeather)
                 return {
 
                     ...this.props.dailyWeather.daily.find(weather=>weather.date
-                        ==moment(this.state.date,"YYYY-MM-DD").format('YYYY-MM-DD')),
+                        === moment(this.state.date,"YYYY-MM-DD").format('YYYY-MM-DD')),
                     city : this.props.dailyWeather.city,
                     country : this.props.dailyWeather.country
                 }
@@ -130,9 +108,9 @@ class App extends Component{
     }
 
     render(){
-        const { currentLocationError, currentLocationPending, currentWeather, currentWeatherPending, currentWeatherError,
-                dailyWeather, dailyWeatherPending, dailyWeatherError }=this.props
-        const { currentTime, date, selectedDay}=this.state
+        const { currentWeather, currentWeatherPending,
+                dailyWeather, dailyWeatherPending }=this.props
+        const { currentTime, date, selectedDay, isLoading}=this.state
         let weather
         if(currentWeather && !currentWeatherPending)
         {
@@ -141,12 +119,13 @@ class App extends Component{
         moment.locale('fr')
         return (
             <div className='app-container'>
-                <div className='row'>
+            {!isLoading &&
+                <div className='row appeared'>
                     <div className='col-md-2'>
                         <div className='card'>
                             {weather && !currentWeatherPending &&
                                 <div className='card-inner'>
-                                    {(weather.city || weather.country) && <div className='default-text city'>{weather.city}{weather.country!=weather.city ? ' ,'+weather.country : '' }</div>}
+                                    {(weather.city || weather.country) && <div className='default-text city'>{weather.city}{weather.country!==weather.city ? ' ,'+weather.country : '' }</div>}
                                     {!weather.city && !weather.country && <div className='default-text city'>Endroit unconnu</div>}
 
                                     <div className='default-text'>{capitalizeFirstLetter(moment().format('dddd'))} {moment().format('Do MMMM  YYYY')}</div>
@@ -164,7 +143,7 @@ class App extends Component{
                                     <div className='weather-day'>{capitalizeFirstLetter(moment(date).format('dddd'))}</div>
                                     <div  className='row'>
                                         <div className='col-md-6' >
-                                                <img src={images.transparent}
+                                                <img src={images.transparent} alt=''
                                                     className='weather-image'
                                                     width={60} height={60}
                                                     style={{backgroundImage: `url("http://openweathermap.org/img/w/${weather.icon}.png")`}} />
@@ -178,7 +157,7 @@ class App extends Component{
                                 </div>
                                 <div className='divider'></div>
                                 <div className='card-row'>
-                                    <img src={icons.pressure}
+                                    <img src={icons.pressure} alt=''
                                         className='icon'/>
                                     <div className='card-inner'>
                                         <div className='weather-title'>Pression</div>
@@ -186,7 +165,7 @@ class App extends Component{
                                     </div>
                                 </div>
                                 <div className='card-row'>
-                                    <img src={icons.wind}
+                                    <img src={icons.wind} alt=''
                                         className='icon'/>
                                     <div className='card-inner'>
                                     <div className='weather-title'>Vent</div>
@@ -194,7 +173,7 @@ class App extends Component{
                                     </div>
                                 </div>
                                 <div className='card-row'>
-                                    <img src={icons.humidity}
+                                    <img src={icons.humidity} alt=''
                                         className='icon'/>
                                     <div className='card-inner'>
                                     <div className='weather-title'>Humidité</div>
@@ -213,18 +192,18 @@ class App extends Component{
                             <div className='search-container'>
 
                             <CountrySearchInput/>
-                            <img src={icons.search}/>
+                            <img src={icons.search} alt=''/>
                             </div>
                             <div className='buttons-container'>
 
                                 <NavLink exact to="/" activeClassName='selected'>
                                     <button className='img-button'>
-                                        <img src={icons.chart}/>
+                                        <img src={icons.chart} alt=''/>
                                     </button>
                                 </NavLink>
                                 <NavLink exact to="/map" activeClassName='selected'>
                                     <button className='img-button'>
-                                        <img src={icons.map}/>
+                                        <img src={icons.map} alt=''/>
                                     </button>
                                 </NavLink>
                             </div>
@@ -243,16 +222,14 @@ class App extends Component{
                     {
                         dailyWeather && !dailyWeatherPending &&
                         dailyWeather.daily.map((weather,index)=>{
-                        //dailyWeather.daily.filter(weather=>moment(weather.date,"YYYY-MM-DD").format('Do MMMM  YYYY') != moment().format('Do MMMM  YYYY'))
-                        //.map((weather,index)=>{
                             return (
-                                <div key={index} className={selectedDay == index ? 'card selected' : 'card'}
+                                <div key={index} className={selectedDay === index ? 'card selected' : 'card'}
                                     onClick={()=>this._selectDate(index, moment(weather.date,"YYYY-MM-DD").format('YYYY-MM-DD'))}>
                                     <div className='card-inner'>
                                         <div className='weather-day'>{capitalizeFirstLetter(moment(weather.date,"YYYY-MM-DD").format('dddd'))}</div>
                                         <div className='default-text'>{moment(weather.date,"YYYY-MM-DD").format('Do MMMM  YYYY')}</div>
                                         <div  className='card-row' >
-                                            <img src={images.transparent}
+                                            <img src={images.transparent} alt=''
                                                 className='weather-image'
                                                 width={60} height={60}
                                                 style={{backgroundImage: `url("http://openweathermap.org/img/w/${weather.icon}.png")`}} />
@@ -275,21 +252,12 @@ class App extends Component{
                     {this._displayDailyWeatherLoading()}
                     </div>
                 </div>
+            }
+            {isLoading &&
+                <SemipolarLoading color={'#B43E5A'}/>
+            }
             </div>
       );
-      /*return(
-          <div className='test'>
-
-          <div><CircleLoading color='red'/></div>
-
-          <div><MeteorRainLoading color='blue'/></div>
-
-          <div><SemipolarLoading color='orange'/></div>
-          <div><SolarSystemLoading color='black'/></div>
-          <div><PointSpreadLoading color='yellow'/></div>
-
-          </div>
-      )*/
     }
 
 

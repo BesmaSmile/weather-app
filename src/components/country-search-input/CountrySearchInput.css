@@ -9,6 +9,7 @@
     height: 45px;
     border-width: 0;
     padding:5px;
+    padding-left: 15px;
     background-color: transparent;
     color: #333;
 }
