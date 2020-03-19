@@ -11,15 +11,6 @@ import { locationActions, weatherActions } from '../../actions';
 import { Switch, Route, NavLink } from "react-router-dom";
 import { capitalizeFirstLetter } from '../../helpers';
 import { SemipolarLoading, SolarSystemLoading,} from 'react-loadingg';
-import Autocomplete from 'react-autocomplete';
-
-const WeatherLoading=(waiting)=>{
-    return (
-        <div className='loading-container'>
-            <SolarSystemLoading color={waiting ? ' #B43E5A' : '#ddd'}/>
-        </div>
-    )
-}
 
 class App extends Component{
     constructor(props){
@@ -122,6 +113,13 @@ class App extends Component{
             {!isLoading &&
                 <div className='row appeared'>
                     <div className='col-md-2'>
+                        <div className='logo'>
+                            <img src={images.logo} width={50} height= {50} alt=''/>
+                            <div className='col-md-2'>
+                            MétéO
+                            </div>
+                        </div>
+
                         <div className='card'>
                             {weather && !currentWeatherPending &&
                                 <div className='card-inner'>

@@ -3,7 +3,6 @@
     height: 100vh;
     background-color: #eee;
     overflow-x: hidden;
-    overflow-y: auto;
 }
 
 .appeared  {
@@ -22,6 +21,25 @@
 @keyframes appear {
     from {opacity: 0.2;}
     to {opacity:1;}
+}
+
+.logo{
+    height: 60px;
+    display: flex;
+    flex-direction: row;
+    padding: 10px;
+    align-items: center;
+    margin-bottom: 10px;
+    background-color: #ddd;
+    border-radius: 3px;
+    box-shadow:0px 2px 3px 0 rgba(0, 0, 0, .2);
+    border-color: transparent;
+}
+
+.logo>div{
+    font-size: 30px;
+    font-weight:bolder;
+    color:  #B43E5A;
 }
 
 .col-md-2, .col-md-8,{
@@ -96,8 +114,6 @@
 .default-text{
     font-size: 18px;
     color:  #888;
-    padding-top: 4px;
-    padding-bottom: 4px;
 }
 
 .weather-day{
@@ -178,7 +194,7 @@ input:focus,button:focus{
     padding: 10px;
 }
 .daily-weather{
-    height: 95vh;
+    height: 97vh;
     overflow-y: scroll;
 }
 

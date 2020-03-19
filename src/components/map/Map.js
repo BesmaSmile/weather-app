@@ -3,8 +3,9 @@ import './Map.css';
 import mapboxgl from 'mapbox-gl';
 import { connect } from 'react-redux';
 import { locationActions, weatherActions } from '../../actions';
+import { apiConstants } from '../../constants';
 
-mapboxgl.accessToken ='pk.eyJ1IjoiYmVzbWEiLCJhIjoiY2s3c2txeDNuMGZ2aTNmcGdwZnkyNmtidiJ9.H0okliaNPLwTS4ar8GW7xw'
+mapboxgl.accessToken =apiConstants.MAPBOX_KEY;
 
 class Map extends Component {
 
