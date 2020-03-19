@@ -9,5 +9,5 @@ Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
 ### Screens
 
-![alt text](screens/screen1.png?raw=true "Title")
+![alt text](screens/screen1.PNG?raw=true "Title")
 
